@@ -109,3 +109,25 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+button {
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent-border);
+  padding: .5rem 1rem;
+  font-family: var(--sans);
+  font-size: 16px;
+  cursor: pointer;
+  width: fit-content;
+  margin: 1rem auto;
+}
+
+button:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+section {
+  padding: 1rem;
+  text-align: left;
+}
