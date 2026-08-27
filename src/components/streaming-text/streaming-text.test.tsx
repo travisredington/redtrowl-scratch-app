@@ -80,4 +80,44 @@ describe('StreamingText', () => {
 
         expect(screen.getByText('He', { exact: false })).toBeInTheDocument();
     });
+
+    it('disables the button while streaming and re-enables it once complete', () => {
+        render(<StreamingText textBlock="Hi" />);
+        const button = screen.getByRole('button', { name: 'Start Stream' });
+
+        expect(button).not.toBeDisabled();
+
+        act(() => {
+            button.click();
+        });
+        expect(button).toBeDisabled();
+
+        act(() => {
+            vi.advanceTimersByTime(300);
+        });
+        expect(button).not.toBeDisabled();
+    });
+
+    it('restarts from scratch when clicked again after completion', () => {
+        render(<StreamingText textBlock="Hi" />);
+        const button = screen.getByRole('button', { name: 'Start Stream' });
+
+        act(() => {
+            button.click();
+        });
+        act(() => {
+            vi.advanceTimersByTime(300);
+        });
+        expect(screen.getByText('Hi', { exact: false })).toBeInTheDocument();
+
+        act(() => {
+            button.click();
+        });
+        expect(screen.queryByText('Hi')).not.toBeInTheDocument();
+
+        act(() => {
+            vi.advanceTimersByTime(100);
+        });
+        expect(screen.getByText('H', { exact: false })).toBeInTheDocument();
+    });
 });

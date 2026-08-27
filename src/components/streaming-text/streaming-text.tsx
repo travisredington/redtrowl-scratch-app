@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import './streaming-text.css';
 
-function StreamingText({ textBlock }: { textBlock: string }) {
+interface StreamingTextProps {
+    textBlock: string;
+}
+
+function StreamingText({ textBlock }: StreamingTextProps) {
     const [streamedText, setStreamedText] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -19,12 +23,12 @@ function StreamingText({ textBlock }: { textBlock: string }) {
             return;
         }
 
+        setStreamedText('');
         setIsStreaming(true);
 
         intervalRef.current = setInterval(() => {
             setStreamedText(prevText => {
                 if (prevText.length >= textBlock.length) {
-                    console.log("Stream complete.");
                     if (intervalRef.current) {
                         clearInterval(intervalRef.current);
                     }
@@ -45,7 +49,7 @@ function StreamingText({ textBlock }: { textBlock: string }) {
             <div>
                 <p>Streaming text:</p>
                 {streamedText && (
-                    <p>
+                    <p aria-live="polite">
                         { streamedText }
                         { isStreaming && <span className="cursor" /> }
                     </p>
