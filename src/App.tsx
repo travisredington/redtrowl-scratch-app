@@ -1,12 +1,25 @@
 import './App.css'
-import StreamingText from './components/streaming-text/streaming-text'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import RootLayout from './pages/Root';
+import ErrorPage from './pages/Error';
+import HomePage from './pages/Home';
 
 function App() {
 
+   const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <RootLayout />,
+      errorElement: <ErrorPage />,
+      children: [
+        { index: true, element: <HomePage /> },
+        // { path: '/streaming', element: <StreamingPage /> }
+      ]
+    }
+  ]);
+
   return (
-    <>
-      <StreamingText textBlock="This is a test of the streaming text component. It should display this text block as a single string." />
-    </>
+    <RouterProvider router={router}/>
   )
 }
 

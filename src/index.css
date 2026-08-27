@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'Queensides';
+  src: url('./assets/fonts/Queensides-3z7Ey.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Queensides-bold';
+  src: url('./assets/fonts/QueensidesMedium-x30zV.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -12,10 +26,12 @@
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-main: 'Queensides';
+  --font-main-bold: 'Queensides-bold';
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font-family: var(--font-main);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -24,6 +40,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --color-charcoal: #2d2c2a;
+  --color-beige: #e6e4cd;
+  --color-pomegranate: #e25643;
+  --color-lightpink: #ffd1d1;
+  --color-lightturquoise: #7bd2d8;
 
   @media (max-width: 1024px) {
     font-size: 16px;
@@ -51,11 +73,9 @@
 }
 
 #root {
-  width: 1126px;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -68,7 +88,6 @@ body {
 
 h1,
 h2 {
-  font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);
 }
@@ -97,7 +116,6 @@ p {
 
 code,
 .counter {
-  font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
   color: var(--text-h);
@@ -111,23 +129,32 @@ code {
 }
 
 button {
-  background: var(--accent);
-  color: var(--bg);
-  border: 1px solid var(--accent-border);
+  font-family: var(--font-main-bold);
+  background: var(--color-pomegranate);
+  color: var(--color-beige);
+  border: 1px solid var(--color-beige);
   padding: .5rem 1rem;
-  font-family: var(--sans);
   font-size: 16px;
   cursor: pointer;
   width: fit-content;
   margin: 1rem auto;
+  border-radius: .5rem;
 }
 
 button:hover {
-  background: var(--accent-bg);
-  color: var(--accent);
+  background: var(--color-lightpink);
+  color: var(--color-charcoal);
 }
 
 section {
   padding: 1rem;
   text-align: left;
+}
+
+a {
+  color: var(--color-pomegranate);
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
 }
