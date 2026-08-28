@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import './header.css';
 import logoImage from '../../../assets/images/logo.png';
-import { NavLink, useMatches } from 'react-router-dom';
+import { useMatches } from 'react-router-dom';
 import PageTitle from '../page-title/page-title';
+import MainNav from '../main-nav/main-nav';
 
 interface RouteHandle {
     title?: string;
@@ -25,50 +26,7 @@ function Header() {
                     <img src={logoImage} alt="TR Logo" />
                 </div>
 
-                <nav>
-                    <ul>
-                        <li>
-                            <NavLink
-                                to="/"
-                                className={({ isActive }) =>
-                                    `${isActive ? 'active' : ''}`
-                                }
-                            >
-                                Home
-                            </NavLink>
-                        </li>
-                        {/* <li>
-                            <NavLink
-                                to="/components"
-                                className={({ isActive }) =>
-                                    `${isActive ? 'active' : ''}`
-                                }
-                            >
-                                Components
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/you"
-                                className={({ isActive }) =>
-                                    `${isActive ? 'active' : ''}`
-                                }
-                            >
-                                You
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink
-                                to="/ants"
-                                className={({ isActive }) =>
-                                    `${isActive ? 'active' : ''}`
-                                }
-                            >
-                                Ants
-                            </NavLink>
-                        </li> */}
-                    </ul>
-                </nav>
+                <MainNav />
             </div>
             
             {pageTitle && (
