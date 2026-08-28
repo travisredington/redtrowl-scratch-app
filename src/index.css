@@ -47,6 +47,10 @@
   --color-lightpink: #ffd1d1;
   --color-lightturquoise: #7bd2d8;
 
+  background-image: url('./assets/images/page-bg.jpg');
+  background-size: cover;
+  background-position: center;
+
   @media (max-width: 1024px) {
     font-size: 16px;
   }
@@ -155,6 +159,10 @@ a {
   color: var(--color-pomegranate);
   text-decoration: none;
   &:hover {
+    color: var(--color-lightpink);
     text-decoration: underline;
+  }
+  &.active {
+    color: var(--color-lightturquoise);
   }
 }

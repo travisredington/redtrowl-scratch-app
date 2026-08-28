@@ -1,0 +1,89 @@
+:root {
+    --page-title-height: 90px;
+}
+
+#page-title {
+    position: relative;
+    width: 100%;
+    height: var(--page-title-height);
+    overflow: hidden;
+    background-color: var(--color-charcoal);
+    border-bottom: 3px solid var(--color-beige);
+}
+
+.skyline {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 85px;
+    overflow: visible;
+}
+
+/* Three jagged, overlapping building silhouettes, split into a left
+   and right half so the middle 25% stays open for the frame below.
+   Outline only (no fill), so overlapping layers read as crossing
+   silhouette lines rather than stacked color blocks. The building
+   right at each gap edge is deliberately tall enough to reach the
+   matching frame's bottom endpoint, so the frame visibly picks up
+   where its skyline color leaves off instead of floating above it. */
+.pipe,
+.frame {
+    fill: none;
+    stroke-width: 2;
+    opacity: 0.92;
+    animation: pipe-pulse 5s ease-in-out infinite;
+}
+
+.pipe-1,
+.frame-1 {
+    --tone: var(--color-pomegranate);
+    stroke: var(--tone);
+    animation-delay: 0s;
+}
+
+.pipe-2,
+.frame-2 {
+    --tone: var(--color-lightturquoise);
+    stroke: var(--tone);
+    animation-delay: 1.2s;
+}
+
+.pipe-3,
+.frame-3 {
+    --tone: var(--color-lightpink);
+    stroke: var(--tone);
+    animation-delay: 2.4s;
+}
+
+/* Where the skyline halves stop, three outlines pick up -- one per
+   pipe color, each inset by exactly one stroke-width from the last so
+   they sit flush against each other with no gap -- and rise up,
+   framing the heading like a gate. */
+
+#page-title h2 {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0 0.5rem;
+    color: var(--color-beige);
+    white-space: nowrap;
+}
+
+@keyframes pipe-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 2px var(--tone));
+    }
+    50% {
+        filter: drop-shadow(0 0 10px var(--tone));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pipe,
+    .frame {
+        animation: none;
+    }
+}

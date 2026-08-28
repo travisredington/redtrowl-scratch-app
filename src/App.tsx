@@ -12,7 +12,7 @@ function App() {
       element: <RootLayout />,
       errorElement: <ErrorPage />,
       children: [
-        { index: true, element: <HomePage /> },
+        { index: true, element: <HomePage />, handle: { title: 'Home' } },
         // { path: '/streaming', element: <StreamingPage /> }
       ]
     }
