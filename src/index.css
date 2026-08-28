@@ -12,6 +12,12 @@
   font-style: normal;
 }
 
+html, body {
+  background-image: url('./assets/images/page-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -46,10 +52,6 @@
   --color-pomegranate: #e25643;
   --color-lightpink: #ffd1d1;
   --color-lightturquoise: #7bd2d8;
-
-  background-image: url('./assets/images/page-bg.jpg');
-  background-size: cover;
-  background-position: center;
 
   @media (max-width: 1024px) {
     font-size: 16px;
@@ -115,7 +117,8 @@ h2 {
   }
 }
 p {
-  margin: 0;
+  margin: .5rem 0;
+  color: var(--color-charcoal);
 }
 
 code,
