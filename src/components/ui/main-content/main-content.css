@@ -1,0 +1,17 @@
+#main-content-container {
+    padding: 1.5rem;
+    background-color: var(--color-pomegranate);
+    border: 1px dotted var(--color-beige);
+    border-radius: 8px;
+    margin: 2rem auto;
+    width: 85%;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+#main-content {
+    text-align: left;
+    padding: 1rem;
+    background-color: var(--color-white, #fff);
+    border: 1px dotted var(--color-lightturquoise);
+    border-radius: 8px;
+}
