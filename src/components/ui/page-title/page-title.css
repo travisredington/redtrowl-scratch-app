@@ -7,7 +7,7 @@
     width: 100%;
     height: var(--page-title-height);
     overflow: hidden;
-    background-color: var(--color-charcoal);
+    /* background-color: var(--color-charcoal); */
     border-bottom: 3px solid var(--color-beige);
 }
 

@@ -15,7 +15,7 @@ function MainNav() {
                         Home
                     </NavLink>
                 </li>
-                {/* <li>
+                <li>
                     <NavLink
                         to="/components"
                         className={({ isActive }) =>
@@ -25,7 +25,7 @@ function MainNav() {
                         Components
                     </NavLink>
                 </li>
-                <li>
+                {/*<li>
                     <NavLink
                         to="/you"
                         className={({ isActive }) =>

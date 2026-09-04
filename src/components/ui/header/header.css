@@ -1,6 +1,7 @@
 header {
     padding: 0;
     background-color: var(--color-charcoal);
+    /* background: linear-gradient(to bottom, var(--color-charcoal), #42403c); */
     border-bottom: 3px solid var(--color-lightpink);
 }
 
@@ -22,8 +23,13 @@ header {
     height: auto;
 }
 
+/* #symbols {
+    margin: 0 auto 2rem auto;
+    font-size: 1.5rem;
+} */
+
 #page-title-container{
     width: 100%;
-    margin-top: calc(var(--page-title-height) / -2);
+    margin-top: calc(var(--page-title-height) / -1.4);
     z-index: 100;
 }

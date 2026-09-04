@@ -1,14 +1,19 @@
 footer {
+    display: flex;
+    align-content: center;
+    justify-content: center;
     position: relative;
     padding: 1rem;
     text-align: center;
     background-color: var(--color-charcoal);
+    /* background: linear-gradient(to bottom, #42403c, var(--color-charcoal)); */
     width: 85%;
     margin: 0 auto;
-    border-radius: 8px 8px 0 0;
+    border-radius: 100px 100px 0 0;
 }
 
 footer p {
+    margin-top: 1rem;
     position: relative;
     z-index: 1;
     color: var(--color-beige);
@@ -38,7 +43,7 @@ footer p {
     --tone: var(--color-lightpink);
     inset: 0 0 0 0;
     border-color: var(--tone);
-    border-radius: 8px 8px 0 0;
+    border-radius: 100px 100px 0 0;
     animation-delay: 0s;
 }
 
@@ -46,7 +51,7 @@ footer p {
     --tone: var(--color-pomegranate);
     inset: 2px 2px 0 2px;
     border-color: var(--tone);
-    border-radius: 6px 6px 0 0;
+    border-radius: 98px 98px 0 0;
     animation-delay: 1.2s;
 }
 
@@ -54,7 +59,7 @@ footer p {
     --tone: var(--color-lightturquoise);
     inset: 4px 4px 0 4px;
     border-color: var(--tone);
-    border-radius: 4px 4px 0 0;
+    border-radius: 96px 96px 0 0;
     animation-delay: 2.4s;
 }
 

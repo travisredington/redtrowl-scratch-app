@@ -26,6 +26,10 @@ function Header() {
                     <img src={logoImage} alt="TR Logo" />
                 </div>
 
+                {/* <div id="symbols">
+                    {symbol} {symbol} {symbol}
+                </div> */}
+
                 <MainNav />
             </div>
             

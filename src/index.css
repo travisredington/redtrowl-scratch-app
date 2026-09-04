@@ -152,6 +152,14 @@ button:hover {
   color: var(--color-charcoal);
 }
 
+input {
+  padding: .5rem;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
 section {
   padding: 1rem;
   text-align: left;
@@ -182,5 +190,9 @@ a {
   }
   &.active {
     color: var(--color-lightturquoise);
+    cursor: default;
+  }
+  &.active:hover {
+    text-decoration: none;
   }
 }
