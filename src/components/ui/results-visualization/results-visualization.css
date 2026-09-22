@@ -1,0 +1,31 @@
+.results-visualization .block {
+    margin-top: 40px;
+}
+
+.results-visualization .block:first-child {
+    margin-top: 0;
+}
+
+.results-visualization .block-head {
+    margin-bottom: 14px;
+}
+
+.results-visualization .block-head h2 {
+    font-size: 16px;
+    font-weight: 650;
+    margin: 0 0 4px;
+    color: var(--viz-text-primary);
+}
+
+.results-visualization .block-desc {
+    color: var(--viz-text-secondary);
+    font-size: 13.5px;
+    max-width: 64ch;
+    margin: 2px 0 0;
+}
+
+.results-visualization.empty-state {
+    color: var(--viz-text-secondary);
+    font-size: 14px;
+    padding: 24px 0;
+}

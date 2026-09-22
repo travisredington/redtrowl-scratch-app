@@ -1,0 +1,96 @@
+.parallel-coordinates {
+    background: var(--viz-surface-1);
+    border: 1px solid var(--viz-border);
+    border-radius: 10px;
+    padding: 14px 16px 10px;
+}
+
+.parallel-coordinates .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--viz-text-secondary);
+}
+
+.parallel-coordinates .controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.parallel-coordinates select {
+    font: inherit;
+    font-size: 13px;
+    color: var(--viz-text-primary);
+    background: var(--viz-surface-1);
+    border: 1px solid var(--viz-border);
+    border-radius: 6px;
+    padding: 5px 8px;
+}
+
+.parallel-coordinates select:focus {
+    outline: 2px solid var(--viz-series-1);
+    outline-offset: 2px;
+}
+
+.parallel-coordinates .note {
+    color: var(--viz-text-muted);
+    font-size: 12.5px;
+}
+
+.parallel-coordinates .chart-mount svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.parallel-coordinates .trait-title {
+    font-size: 11.5px;
+    fill: var(--viz-text-primary);
+    font-weight: 650;
+}
+
+.parallel-coordinates .axis-label {
+    font-size: 10px;
+    fill: var(--viz-text-muted);
+}
+
+.parallel-coordinates .value-label {
+    font-size: 11px;
+    fill: var(--viz-text-primary);
+    font-weight: 600;
+}
+
+.parallel-coordinates .hit {
+    cursor: pointer;
+}
+
+.parallel-coordinates .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12.5px;
+    color: var(--viz-text-secondary);
+    margin-top: 8px;
+    align-items: center;
+}
+
+.parallel-coordinates .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: -1px;
+}
+
+.parallel-coordinates .dot-active {
+    background: var(--viz-series-1);
+}
+
+.parallel-coordinates .dot-rest {
+    background: var(--viz-gray-line);
+}

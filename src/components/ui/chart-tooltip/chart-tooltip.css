@@ -1,0 +1,13 @@
+.chart-tooltip {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+    background: var(--viz-text-primary);
+    color: var(--viz-surface-1);
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 6px 9px;
+    border-radius: 6px;
+    max-width: 240px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
