@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Big Five × Political Compass — Sample Visualization</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #e6e4cd;
+    --page-plane:     #d7d5c0;
+    --text-primary:   #2d2c2a;
+    --text-secondary: #6e6c63;
+    --text-muted:     #939184;
+    --gridline:       #d0ceb9;
+    --baseline:       #b2b09f;
+    --border:         rgba(45,44,42,0.14);
+    --series-1:       #008f96;
+    --gray-line:      #939184;
+    --pos:            #008f96;
+    --neg:            #e25643;
+    --seq-low:        #d6edef;
+    --seq-high:       #005257;
+    --tint-1:         #ffd1d1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --surface-1:      #2d2c2a;
+      --page-plane:     #1d1d1b;
+      --text-primary:   #e6e4cd;
+      --text-secondary: #afad9c;
+      --text-muted:     #8a887c;
+      --gridline:       #494842;
+      --baseline:       #68675e;
+      --border:         rgba(230,228,205,0.14);
+      --series-1:       #00a3ab;
+      --gray-line:      #8a887c;
+      --pos:            #00a3ab;
+      --neg:            #e25643;
+      --seq-low:        #145155;
+      --seq-high:       #9fdade;
+      --tint-1:         rgba(226,86,67,0.18);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page-plane);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; font-weight: 650; margin: 0 0 6px; }
+  h2 { font-size: 16px; font-weight: 650; margin: 0 0 4px; }
+  h3 { font-size: 13px; font-weight: 650; margin: 0 0 6px; color: var(--text-primary); }
+  .intro { color: var(--text-secondary); font-size: 14px; max-width: 70ch; margin: 0 0 8px; }
+  .note { color: var(--text-muted); font-size: 12.5px; max-width: 68ch; }
+  section.block { margin-top: 40px; }
+  .block-head { margin-bottom: 14px; }
+  .block-desc { color: var(--text-secondary); font-size: 13.5px; max-width: 64ch; margin: 2px 0 0; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px 10px;
+  }
+  .grid-5 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .chart-mount svg { width: 100%; height: auto; display: block; }
+  .axis-label { font-size: 10px; fill: var(--text-muted); }
+  .pole-label { font-size: 10px; fill: var(--text-muted); font-weight: 600; }
+  .name-label { font-size: 11px; fill: var(--text-secondary); }
+  .value-label { font-size: 11px; fill: var(--text-primary); font-weight: 600; }
+  .trait-title { font-size: 11.5px; fill: var(--text-primary); font-weight: 650; }
+  .quadrant-label { font-size: 10.5px; fill: var(--text-muted); font-weight: 600; }
+  .hit { cursor: pointer; }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .controls label { display: flex; align-items: center; gap: 6px; }
+  select {
+    font: inherit;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 8px;
+  }
+  select:focus, summary:focus, details:focus-within { outline: 2px solid var(--series-1); outline-offset: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 12.5px; color: var(--text-secondary); margin-top: 8px; align-items: center; }
+  .legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .grad-legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+  .grad-bar { width: 120px; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--seq-low), var(--seq-high)); border: 1px solid var(--border); }
+  #tooltip {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+    background: var(--text-primary);
+    color: var(--surface-1);
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 6px 9px;
+    border-radius: 6px;
+    max-width: 240px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  #tooltip[hidden] { display: none; }
+  details.table-wrap { margin-top: 40px; }
+  summary {
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 4px 0;
+  }
+  table.data-table {
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 13px;
+    width: 100%;
+    max-width: 680px;
+  }
+  table.data-table th, table.data-table td {
+    text-align: right;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--gridline);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data-table th:first-child, table.data-table td:first-child,
+  table.data-table th:nth-child(2), table.data-table td:nth-child(2) { text-align: left; font-variant-numeric: normal; }
+  table.data-table th { color: var(--text-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+  footer { margin-top: 48px; color: var(--text-muted); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div id="tooltip" hidden></div>
+<main>
+  <h1>Big Five × Political Compass — sample visualization</h1>
+  <p class="intro">
+    The same ten fictional people, with made-up <strong>Political Compass</strong>-style results (an
+    Economic axis, Left −10 to Right +10, and a Social axis, Libertarian −10 to Authoritarian +10) plus
+    a made-up sexual identity for each person, so it can be used as a grouping variable rather than a
+    third numeric axis. Everything here is invented sample data — swap in real numbers to replace it.
+  </p>
+
+  <section class="block" id="section-bars">
+    <div class="block-head">
+      <h2>One variable at a time</h2>
+      <p class="block-desc">The five Big Five traits ranked as before, plus the two compass axes as diverging bars — since Left/Right and Libertarian/Authoritarian are bipolar, each bar grows from a zero center instead of from the edge.</p>
+    </div>
+    <div class="grid-5" id="bar-grid"></div>
+  </section>
+
+  <section class="block" id="section-scatter">
+    <div class="block-head">
+      <h2>Two Big Five traits at once</h2>
+      <p class="block-desc">Unchanged from before — pick any two traits to compare.</p>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <label>X axis <select id="scatter-x"></select></label>
+        <label>Y axis <select id="scatter-y"></select></label>
+      </div>
+      <div class="chart-mount" id="scatter-mount"></div>
+    </div>
+  </section>
+
+  <section class="block" id="section-compass">
+    <div class="block-head">
+      <h2>Personality × political compass</h2>
+      <p class="block-desc">The classic compass layout — Economic left/right on X, Libertarian/Authoritarian on Y — with each point colored by whichever Big Five trait you pick, so you can see if that trait clusters in a particular corner.</p>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <label>Color points by <select id="compass-color"></select></label>
+        <label>Ring around <select id="compass-ring"></select></label>
+      </div>
+      <div class="chart-mount" id="compass-mount"></div>
+      <div class="legend">
+        <div class="grad-legend"><span id="grad-low-label">0</span><span class="grad-bar"></span><span id="grad-high-label">100</span></div>
+        <span class="note" style="margin:0;">the ring marks whichever identity group is selected, independent of fill color</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="section-identity">
+    <div class="block-head">
+      <h2>Group averages by sexual identity</h2>
+      <p class="block-desc">Same seven variables, same chart types, but each bar is now a group average across everyone who shares that identity in this fictional set (group size noted on hover) instead of one bar per person. With only ten people the groups are tiny, so treat this as a shape to fill in with a real sample, not a finding.</p>
+    </div>
+    <div class="grid-5" id="identity-grid"></div>
+  </section>
+
+  <section class="block" id="section-parallel">
+    <div class="block-head">
+      <h2>All seven, at once</h2>
+      <p class="block-desc">
+        Parallel coordinates extended from five axes to seven — the five traits plus both compass axes,
+        each keeping its own scale. Everyone else fades to gray so one profile stays readable; this is the
+        form that scales past the 3–4 people a radar chart can handle.
+      </p>
+    </div>
+    <div class="card">
+      <div class="controls">
+        <label>Highlight <select id="parallel-highlight"></select></label>
+        <span class="note" style="margin:0;">or hover any line — pick a person, or "Everyone: [identity]" to light up a whole group at once</span>
+      </div>
+      <div class="chart-mount" id="parallel-mount"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--series-1)"></span>Highlighted</span>
+        <span><span class="dot" style="background:var(--gray-line)"></span>Everyone else</span>
+      </div>
+    </div>
+  </section>
+
+  <details class="table-wrap">
+    <summary>Show the underlying data as a table</summary>
+    <div id="table-mount"></div>
+  </details>
+
+  <footer>
+    Sample data only — the Big Five scores, the Economic/Social compass scores, and the sexual identity
+    labels are all invented, for ten fictional people, assigned independently of one another (no
+    correlation between them is intended or implied). Replace the <code>people</code> array in this file
+    with real results to make it reflect an actual dataset.
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+
+  const traits = [
+    { key: "O", label: "Openness",            min: 0, max: 100 },
+    { key: "C", label: "Conscientiousness",   min: 0, max: 100 },
+    { key: "E", label: "Extraversion",        min: 0, max: 100 },
+    { key: "A", label: "Agreeableness",       min: 0, max: 100 },
+    { key: "N", label: "Neuroticism",         min: 0, max: 100 }
+  ];
+  const politicalAxes = [
+    { key: "Econ", label: "Economic (Left–Right)",              min: -10, max: 10, negPole: "Left",        posPole: "Right",        negPoleShort: "L",    posPoleShort: "R" },
+    { key: "Soc",  label: "Social (Libertarian–Authoritarian)",  min: -10, max: 10, negPole: "Libertarian", posPole: "Authoritarian", negPoleShort: "Lib", posPoleShort: "Auth" }
+  ];
+  const allAxes = traits.concat(politicalAxes);
+
+  const people = [
+    { name: "Person 1",  O: 72, C: 55, E: 40, A: 61, N: 35, Econ: -4, Soc:  5, identity: "Heterosexual" },
+    { name: "Person 2",  O: 48, C: 80, E: 30, A: 70, N: 25, Econ:  5, Soc:  6, identity: "Gay" },
+    { name: "Person 3",  O: 85, C: 45, E: 75, A: 50, N: 60, Econ: -7, Soc: -6, identity: "Bisexual" },
+    { name: "Person 4",  O: 33, C: 65, E: 55, A: 40, N: 70, Econ:  6, Soc:  4, identity: "Heterosexual" },
+    { name: "Person 5",  O: 60, C: 70, E: 65, A: 80, N: 20, Econ:  3, Soc: -4, identity: "Lesbian" },
+    { name: "Person 6",  O: 55, C: 50, E: 20, A: 45, N: 85, Econ: -2, Soc:  5, identity: "Heterosexual" },
+    { name: "Person 7",  O: 78, C: 60, E: 85, A: 65, N: 30, Econ: -6, Soc: -7, identity: "Bisexual" },
+    { name: "Person 8",  O: 40, C: 35, E: 45, A: 55, N: 50, Econ:  1, Soc: -1, identity: "Asexual" },
+    { name: "Person 9",  O: 90, C: 75, E: 50, A: 30, N: 40, Econ: -8, Soc: -8, identity: "Gay" },
+    { name: "Person 10", O: 25, C: 85, E: 60, A: 75, N: 15, Econ:  7, Soc:  2, identity: "Heterosexual" }
+  ];
+  // Group people by sexual identity and average each axis, for the group-comparison charts below.
+  // Assigned independent of the personality/political numbers above — no correlation is implied or intended.
+  function groupAverages(field) {
+    const groups = {};
+    people.forEach(p => { (groups[p[field]] = groups[p[field]] || []).push(p); });
+    return Object.keys(groups).sort().map(name => {
+      const members = groups[name];
+      const row = { name, n: members.length };
+      allAxes.forEach(axis => {
+        row[axis.key] = Math.round((members.reduce((s, p) => s + p[axis.key], 0) / members.length) * 10) / 10;
+      });
+      return row;
+    });
+  }
+
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function ticks(min, max, n) {
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(min + (i / (n - 1)) * (max - min));
+    return out;
+  }
+
+  const tooltip = document.getElementById("tooltip");
+  function showTip(evt, html) { tooltip.innerHTML = html; tooltip.hidden = false; moveTip(evt); }
+  function moveTip(evt) { tooltip.style.left = (evt.clientX + 14) + "px"; tooltip.style.top = (evt.clientY + 14) + "px"; }
+  function hideTip() { tooltip.hidden = true; }
+
+  // ---------- helpers to build rounded bar paths, anchored square at the baseline ----------
+  function roundedRightRect(x0, y0, w, h, r) {
+    const x1 = x0 + w;
+    if (w <= r) return `M${x0},${y0} H${x1} V${y0 + h} H${x0} Z`;
+    return `M${x0},${y0} H${x1 - r} Q${x1},${y0} ${x1},${y0 + r} V${y0 + h - r} Q${x1},${y0 + h} ${x1 - r},${y0 + h} H${x0} Z`;
+  }
+  function roundedLeftRect(x0, y0, w, h, r) {
+    const x1 = x0 + w;
+    if (w <= r) return `M${x0},${y0} H${x1} V${y0 + h} H${x0} Z`;
+    return `M${x0 + r},${y0} H${x1} V${y0 + h} H${x0 + r} Q${x0},${y0 + h} ${x0},${y0 + h - r} V${y0 + r} Q${x0},${y0} ${x0 + r},${y0} Z`;
+  }
+
+  // ---------- small-multiple magnitude bar charts (0..100 traits) ----------
+  function renderBarChart(mount, axis, dataset) {
+    dataset = dataset || people;
+    mount.innerHTML = "";
+    const W = 400, marginLeft = 100, marginRight = 40, marginTop = 8, rowH = 27, barH = 14, axisBand = 24;
+    const sorted = [...dataset].sort((a, b) => b[axis.key] - a[axis.key]);
+    const plotH = sorted.length * rowH;
+    const H = marginTop + plotH + axisBand;
+    const plotLeft = marginLeft, plotRight = W - marginRight;
+    const x = v => plotLeft + ((v - axis.min) / (axis.max - axis.min)) * (plotRight - plotLeft);
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${axis.label} scores by person, highest to lowest` });
+
+    ticks(axis.min, axis.max, 5).forEach(v => {
+      svg.appendChild(el("line", { x1: x(v), x2: x(v), y1: marginTop, y2: marginTop + plotH, stroke: "var(--gridline)", "stroke-width": 1 }));
+      const t = el("text", { class: "axis-label", x: x(v), y: marginTop + plotH + 16, "text-anchor": "middle" });
+      t.textContent = Math.round(v);
+      svg.appendChild(t);
+    });
+    svg.appendChild(el("line", { x1: plotLeft, x2: plotLeft, y1: marginTop, y2: marginTop + plotH, stroke: "var(--baseline)", "stroke-width": 1 }));
+
+    sorted.forEach((p, i) => {
+      const rowY = marginTop + i * rowH;
+      const barY = rowY + (rowH - barH) / 2;
+      const val = p[axis.key];
+      const bw = x(val) - plotLeft;
+      const r = 4;
+
+      const nameT = el("text", { class: "name-label", x: plotLeft - 8, y: barY + barH / 2 + 4, "text-anchor": "end" });
+      nameT.textContent = p.name.replace("Person ", "P");
+      svg.appendChild(nameT);
+
+      svg.appendChild(el("path", { d: roundedRightRect(plotLeft, barY, bw, barH, r), fill: "var(--series-1)" }));
+
+      if (i === 0 || i === sorted.length - 1) {
+        const vt = el("text", { class: "value-label", x: plotLeft + bw + 6, y: barY + barH / 2 + 4 });
+        vt.textContent = val;
+        svg.appendChild(vt);
+      }
+
+      const hit = el("rect", { class: "hit", x: plotLeft, y: rowY, width: plotRight - plotLeft, height: rowH, fill: "transparent" });
+      hit.addEventListener("mouseenter", e => showTip(e, `<strong>${p.name}</strong>${p.n ? ` (n=${p.n})` : ""}<br>${axis.label}: ${val}`));
+      hit.addEventListener("mousemove", moveTip);
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(hit);
+    });
+
+    mount.appendChild(svg);
+  }
+
+  // ---------- small-multiple diverging bar charts (bipolar compass axes) ----------
+  function renderDivergingBar(mount, axis, dataset) {
+    dataset = dataset || people;
+    mount.innerHTML = "";
+    const W = 400, marginLeft = 100, marginRight = 40, marginTop = 8, rowH = 27, barH = 14, axisBand = 30;
+    const sorted = [...dataset].sort((a, b) => b[axis.key] - a[axis.key]);
+    const plotH = sorted.length * rowH;
+    const H = marginTop + plotH + axisBand;
+    const plotLeft = marginLeft, plotRight = W - marginRight;
+    const x = v => plotLeft + ((v - axis.min) / (axis.max - axis.min)) * (plotRight - plotLeft);
+    const zeroX = x(0);
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${axis.label} scores by person` });
+
+    ticks(axis.min, axis.max, 5).forEach(v => {
+      svg.appendChild(el("line", { x1: x(v), x2: x(v), y1: marginTop, y2: marginTop + plotH, stroke: "var(--gridline)", "stroke-width": 1 }));
+      const t = el("text", { class: "axis-label", x: x(v), y: marginTop + plotH + 16, "text-anchor": "middle" });
+      t.textContent = Math.round(v);
+      svg.appendChild(t);
+    });
+    const negT = el("text", { class: "pole-label", x: plotLeft, y: marginTop + plotH + 27, "text-anchor": "start" });
+    negT.textContent = axis.negPole;
+    const posT = el("text", { class: "pole-label", x: plotRight, y: marginTop + plotH + 27, "text-anchor": "end" });
+    posT.textContent = axis.posPole;
+    svg.appendChild(negT); svg.appendChild(posT);
+
+    svg.appendChild(el("line", { x1: zeroX, x2: zeroX, y1: marginTop, y2: marginTop + plotH, stroke: "var(--baseline)", "stroke-width": 1.5 }));
+
+    sorted.forEach((p, i) => {
+      const rowY = marginTop + i * rowH;
+      const barY = rowY + (rowH - barH) / 2;
+      const val = p[axis.key];
+      const r = 4;
+
+      const nameT = el("text", { class: "name-label", x: plotLeft - 8, y: barY + barH / 2 + 4, "text-anchor": "end" });
+      nameT.textContent = p.name.replace("Person ", "P");
+      svg.appendChild(nameT);
+
+      const vx = x(val);
+      let path, labelX, anchor;
+      if (val >= 0) {
+        path = roundedRightRect(zeroX, barY, vx - zeroX, barH, r);
+        labelX = vx + 6; anchor = "start";
+      } else {
+        path = roundedLeftRect(vx, barY, zeroX - vx, barH, r);
+        labelX = vx - 6; anchor = "end";
+      }
+      svg.appendChild(el("path", { d: path, fill: val >= 0 ? "var(--pos)" : "var(--neg)" }));
+
+      if (i === 0 || i === sorted.length - 1) {
+        const vt = el("text", { class: "value-label", x: labelX, y: barY + barH / 2 + 4, "text-anchor": anchor });
+        vt.textContent = val;
+        svg.appendChild(vt);
+      }
+
+      const hit = el("rect", { class: "hit", x: plotLeft, y: rowY, width: plotRight - plotLeft, height: rowH, fill: "transparent" });
+      hit.addEventListener("mouseenter", e => showTip(e, `<strong>${p.name}</strong>${p.n ? ` (n=${p.n})` : ""}<br>${axis.label}: ${val} (${val >= 0 ? axis.posPole : axis.negPole}-leaning)`));
+      hit.addEventListener("mousemove", moveTip);
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(hit);
+    });
+
+    mount.appendChild(svg);
+  }
+
+  const barGrid = document.getElementById("bar-grid");
+  allAxes.forEach(axis => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const h = document.createElement("h3");
+    h.textContent = axis.label;
+    const mount = document.createElement("div");
+    mount.className = "chart-mount";
+    card.appendChild(h);
+    card.appendChild(mount);
+    barGrid.appendChild(card);
+    if (politicalAxes.includes(axis)) renderDivergingBar(mount, axis);
+    else renderBarChart(mount, axis);
+  });
+
+  // ---------- small-multiple group-average bar charts (by sexual identity) ----------
+  const identityGrid = document.getElementById("identity-grid");
+  const identityAverages = groupAverages("identity");
+  allAxes.forEach(axis => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const h = document.createElement("h3");
+    h.textContent = axis.label;
+    const mount = document.createElement("div");
+    mount.className = "chart-mount";
+    card.appendChild(h);
+    card.appendChild(mount);
+    identityGrid.appendChild(card);
+    if (politicalAxes.includes(axis)) renderDivergingBar(mount, axis, identityAverages);
+    else renderBarChart(mount, axis, identityAverages);
+  });
+
+  // ---------- scatter: two Big Five traits ----------
+  const scatterXSel = document.getElementById("scatter-x");
+  const scatterYSel = document.getElementById("scatter-y");
+  traits.forEach(t => {
+    const ox = document.createElement("option"); ox.value = t.key; ox.textContent = t.label;
+    scatterXSel.appendChild(ox);
+    const oy = document.createElement("option"); oy.value = t.key; oy.textContent = t.label;
+    scatterYSel.appendChild(oy);
+  });
+  scatterXSel.value = "E";
+  scatterYSel.value = "N";
+
+  function renderScatter() {
+    const xAxis = traits.find(t => t.key === scatterXSel.value);
+    const yAxis = traits.find(t => t.key === scatterYSel.value);
+    const mount = document.getElementById("scatter-mount");
+    mount.innerHTML = "";
+
+    const W = 640, H = 460, marginLeft = 60, marginRight = 20, marginTop = 16, marginBottom = 44;
+    const plotLeft = marginLeft, plotRight = W - marginRight, plotTop = marginTop, plotBottom = H - marginBottom;
+    const sx = v => plotLeft + ((v - xAxis.min) / (xAxis.max - xAxis.min)) * (plotRight - plotLeft);
+    const sy = v => plotBottom - ((v - yAxis.min) / (yAxis.max - yAxis.min)) * (plotBottom - plotTop);
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${xAxis.label} versus ${yAxis.label}, one point per person` });
+
+    ticks(xAxis.min, xAxis.max, 5).forEach(v => {
+      svg.appendChild(el("line", { x1: sx(v), x2: sx(v), y1: plotTop, y2: plotBottom, stroke: "var(--gridline)" }));
+      const xt = el("text", { class: "axis-label", x: sx(v), y: plotBottom + 16, "text-anchor": "middle" });
+      xt.textContent = Math.round(v); svg.appendChild(xt);
+    });
+    ticks(yAxis.min, yAxis.max, 5).forEach(v => {
+      svg.appendChild(el("line", { x1: plotLeft, x2: plotRight, y1: sy(v), y2: sy(v), stroke: "var(--gridline)" }));
+      const yt = el("text", { class: "axis-label", x: plotLeft - 8, y: sy(v) + 3, "text-anchor": "end" });
+      yt.textContent = Math.round(v); svg.appendChild(yt);
+    });
+    svg.appendChild(el("line", { x1: plotLeft, x2: plotLeft, y1: plotTop, y2: plotBottom, stroke: "var(--baseline)" }));
+    svg.appendChild(el("line", { x1: plotLeft, x2: plotRight, y1: plotBottom, y2: plotBottom, stroke: "var(--baseline)" }));
+
+    const xTitle = el("text", { class: "trait-title", x: (plotLeft + plotRight) / 2, y: H - 6, "text-anchor": "middle" });
+    xTitle.textContent = xAxis.label; svg.appendChild(xTitle);
+    const yTitle = el("text", { class: "trait-title", x: -((plotTop + plotBottom) / 2), y: 14, "text-anchor": "middle", transform: "rotate(-90)" });
+    yTitle.textContent = yAxis.label; svg.appendChild(yTitle);
+
+    people.forEach(p => {
+      const cx = sx(p[xAxis.key]), cy = sy(p[yAxis.key]);
+      const hit = el("circle", { class: "hit", cx, cy, r: 13, fill: "transparent" });
+      hit.addEventListener("mouseenter", e => showTip(e, `<strong>${p.name}</strong><br>${xAxis.label}: ${p[xAxis.key]}<br>${yAxis.label}: ${p[yAxis.key]}`));
+      hit.addEventListener("mousemove", moveTip);
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(el("circle", { cx, cy, r: 6, fill: "var(--series-1)", stroke: "var(--surface-1)", "stroke-width": 2 }));
+      const lbl = el("text", { class: "name-label", x: cx + 9, y: cy - 8 });
+      lbl.textContent = p.name.replace("Person ", "P");
+      svg.appendChild(lbl);
+      svg.appendChild(hit);
+    });
+
+    mount.appendChild(svg);
+  }
+  scatterXSel.addEventListener("change", () => { if (scatterXSel.value === scatterYSel.value) scatterYSel.selectedIndex = (scatterYSel.selectedIndex + 1) % traits.length; renderScatter(); });
+  scatterYSel.addEventListener("change", () => { if (scatterYSel.value === scatterXSel.value) scatterXSel.selectedIndex = (scatterXSel.selectedIndex + 1) % traits.length; renderScatter(); });
+  renderScatter();
+
+  // ---------- political compass, colored by a chosen Big Five trait ----------
+  function hexToRgb(hex) {
+    hex = hex.trim().replace("#", "");
+    return [parseInt(hex.substr(0, 2), 16), parseInt(hex.substr(2, 2), 16), parseInt(hex.substr(4, 2), 16)];
+  }
+  function lerpColor(t, lowHex, highHex) {
+    const a = hexToRgb(lowHex), b = hexToRgb(highHex);
+    const c = a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
+  }
+
+  const compassColorSel = document.getElementById("compass-color");
+  traits.forEach(t => { const o = document.createElement("option"); o.value = t.key; o.textContent = t.label; compassColorSel.appendChild(o); });
+  compassColorSel.value = "O";
+
+  const identityValues = [...new Set(people.map(p => p.identity))].sort();
+  const compassRingSel = document.getElementById("compass-ring");
+  const ringNoneOpt = document.createElement("option"); ringNoneOpt.value = ""; ringNoneOpt.textContent = "— none —";
+  compassRingSel.appendChild(ringNoneOpt);
+  identityValues.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; compassRingSel.appendChild(o); });
+  compassRingSel.value = "";
+
+  function renderCompass() {
+    const colorAxis = traits.find(t => t.key === compassColorSel.value);
+    document.getElementById("grad-low-label").textContent = colorAxis.label + ": " + colorAxis.min;
+    document.getElementById("grad-high-label").textContent = colorAxis.max;
+
+    const cs = getComputedStyle(document.documentElement);
+    const lowHex = cs.getPropertyValue("--seq-low") || "#cde2fb";
+    const highHex = cs.getPropertyValue("--seq-high") || "#104281";
+
+    const econ = politicalAxes[0], soc = politicalAxes[1];
+    const mount = document.getElementById("compass-mount");
+    mount.innerHTML = "";
+
+    const W = 640, H = 500, marginLeft = 60, marginRight = 20, marginTop = 20, marginBottom = 44;
+    const plotLeft = marginLeft, plotRight = W - marginRight, plotTop = marginTop, plotBottom = H - marginBottom;
+    const sx = v => plotLeft + ((v - econ.min) / (econ.max - econ.min)) * (plotRight - plotLeft);
+    const sy = v => plotBottom - ((v - soc.min) / (soc.max - soc.min)) * (plotBottom - plotTop);
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Political compass, points colored by " + colorAxis.label });
+
+    ticks(econ.min, econ.max, 5).forEach(v => {
+      svg.appendChild(el("line", { x1: sx(v), x2: sx(v), y1: plotTop, y2: plotBottom, stroke: "var(--gridline)" }));
+      const t = el("text", { class: "axis-label", x: sx(v), y: plotBottom + 16, "text-anchor": "middle" });
+      t.textContent = Math.round(v); svg.appendChild(t);
+    });
+    ticks(soc.min, soc.max, 5).forEach(v => {
+      svg.appendChild(el("line", { x1: plotLeft, x2: plotRight, y1: sy(v), y2: sy(v), stroke: "var(--gridline)" }));
+      const t = el("text", { class: "axis-label", x: plotLeft - 8, y: sy(v) + 3, "text-anchor": "end" });
+      t.textContent = Math.round(v); svg.appendChild(t);
+    });
+    // zero crosshair, slightly heavier than the regular grid
+    svg.appendChild(el("line", { x1: sx(0), x2: sx(0), y1: plotTop, y2: plotBottom, stroke: "var(--baseline)", "stroke-width": 1.5 }));
+    svg.appendChild(el("line", { x1: plotLeft, x2: plotRight, y1: sy(0), y2: sy(0), stroke: "var(--baseline)", "stroke-width": 1.5 }));
+
+    // quadrant corner labels
+    const qLabels = [
+      { x: plotLeft + 6, y: plotTop + 12, t: "Authoritarian Left", anchor: "start" },
+      { x: plotRight - 6, y: plotTop + 12, t: "Authoritarian Right", anchor: "end" },
+      { x: plotLeft + 6, y: plotBottom - 6, t: "Libertarian Left", anchor: "start" },
+      { x: plotRight - 6, y: plotBottom - 6, t: "Libertarian Right", anchor: "end" }
+    ];
+    qLabels.forEach(q => {
+      const t = el("text", { class: "quadrant-label", x: q.x, y: q.y, "text-anchor": q.anchor });
+      t.textContent = q.t; svg.appendChild(t);
+    });
+
+    const xTitle = el("text", { class: "trait-title", x: (plotLeft + plotRight) / 2, y: H - 6, "text-anchor": "middle" });
+    xTitle.textContent = econ.label; svg.appendChild(xTitle);
+    const yTitle = el("text", { class: "trait-title", x: -((plotTop + plotBottom) / 2), y: 14, "text-anchor": "middle", transform: "rotate(-90)" });
+    yTitle.textContent = soc.label; svg.appendChild(yTitle);
+
+    const ringValue = compassRingSel.value;
+    people.forEach(p => {
+      const cx = sx(p.Econ), cy = sy(p.Soc);
+      const t = (p[colorAxis.key] - colorAxis.min) / (colorAxis.max - colorAxis.min);
+      const fill = lerpColor(t, lowHex, highHex);
+      const isRinged = ringValue && p.identity === ringValue;
+      if (isRinged) svg.appendChild(el("circle", { cx, cy, r: 11, fill: "none", stroke: "var(--text-primary)", "stroke-width": 2 }));
+      const hit = el("circle", { class: "hit", cx, cy, r: 13, fill: "transparent" });
+      hit.addEventListener("mouseenter", e => showTip(e,
+        `<strong>${p.name}</strong><br>Economic: ${p.Econ} (${p.Econ >= 0 ? "Right" : "Left"})<br>Social: ${p.Soc} (${p.Soc >= 0 ? "Authoritarian" : "Libertarian"})<br>${colorAxis.label}: ${p[colorAxis.key]}<br>Identity: ${p.identity}`
+      ));
+      hit.addEventListener("mousemove", moveTip);
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(el("circle", { cx, cy, r: 7, fill, stroke: "var(--surface-1)", "stroke-width": 2 }));
+      const lbl = el("text", { class: "name-label", x: cx + 10, y: cy - 9 });
+      lbl.textContent = p.name.replace("Person ", "P");
+      svg.appendChild(lbl);
+      svg.appendChild(hit);
+    });
+
+    mount.appendChild(svg);
+  }
+  compassColorSel.addEventListener("change", renderCompass);
+  compassRingSel.addEventListener("change", renderCompass);
+  renderCompass();
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderCompass);
+
+  // ---------- parallel coordinates: all seven axes ----------
+  const highlightSel = document.getElementById("parallel-highlight");
+  const noneOpt = document.createElement("option"); noneOpt.value = ""; noneOpt.textContent = "— none —";
+  highlightSel.appendChild(noneOpt);
+  const personGroup = document.createElement("optgroup"); personGroup.label = "Person";
+  people.forEach(p => { const o = document.createElement("option"); o.value = "person:" + p.name; o.textContent = p.name; personGroup.appendChild(o); });
+  highlightSel.appendChild(personGroup);
+  const identityGroup = document.createElement("optgroup"); identityGroup.label = "Sexual identity";
+  identityValues.forEach(v => { const o = document.createElement("option"); o.value = "identity:" + v; o.textContent = "Everyone: " + v; identityGroup.appendChild(o); });
+  highlightSel.appendChild(identityGroup);
+  highlightSel.value = "person:Person 6";
+
+  function matchesSelector(p, selector) {
+    if (!selector) return false;
+    if (selector.indexOf("person:") === 0) return p.name === selector.slice(7);
+    if (selector.indexOf("identity:") === 0) return p.identity === selector.slice(9);
+    return false;
+  }
+
+  function renderParallel(hoverSelector) {
+    const activeSelector = hoverSelector !== undefined ? hoverSelector : highlightSel.value;
+    const mount = document.getElementById("parallel-mount");
+    mount.innerHTML = "";
+
+    const W = 760, H = 400, marginLeft = 50, marginRight = 50, marginTop = 34, marginBottom = 28;
+    const plotTop = marginTop, plotBottom = H - marginBottom;
+    const n = allAxes.length;
+    const axisX = i => marginLeft + i * ((W - marginLeft - marginRight) / (n - 1));
+    const y = (v, axis) => plotBottom - ((v - axis.min) / (axis.max - axis.min)) * (plotBottom - plotTop);
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "All five traits and both compass axes per person, parallel coordinates" });
+
+    // faint shared midline just as a visual anchor across axes (no numeric meaning across axes)
+    svg.appendChild(el("line", { x1: marginLeft, x2: W - marginRight, y1: (plotTop + plotBottom) / 2, y2: (plotTop + plotBottom) / 2, stroke: "var(--gridline)" }));
+
+    allAxes.forEach((axis, i) => {
+      const x = axisX(i);
+      svg.appendChild(el("line", { x1: x, x2: x, y1: plotTop, y2: plotBottom, stroke: "var(--baseline)" }));
+      const title = el("text", { class: "trait-title", x, y: plotTop - 18, "text-anchor": "middle" });
+      title.textContent = axis.key;
+      svg.appendChild(title);
+      const isLast = i === allAxes.length - 1;
+      const labelAnchor = isLast ? "end" : "start";
+      const labelX = isLast ? x - 4 : x + 4;
+      const maxT = el("text", { class: "axis-label", x: labelX, y: plotTop - 4, "text-anchor": labelAnchor });
+      maxT.textContent = axis.max + (axis.posPoleShort ? ` ${axis.posPoleShort}` : "");
+      svg.appendChild(maxT);
+      const minT = el("text", { class: "axis-label", x: labelX, y: plotBottom + 14, "text-anchor": labelAnchor });
+      minT.textContent = axis.min + (axis.negPoleShort ? ` ${axis.negPoleShort}` : "");
+      svg.appendChild(minT);
+    });
+
+    const ordered = [...people].sort((a, b) => (matchesSelector(a, activeSelector) ? 1 : 0) - (matchesSelector(b, activeSelector) ? 1 : 0));
+
+    ordered.forEach(p => {
+      const isActive = matchesSelector(p, activeSelector);
+      const pts = allAxes.map((axis, i) => `${axisX(i)},${y(p[axis.key], axis)}`).join(" ");
+
+      const line = el("polyline", {
+        points: pts, fill: "none",
+        stroke: isActive ? "var(--series-1)" : "var(--gray-line)",
+        "stroke-width": isActive ? 2.5 : 1.4,
+        opacity: isActive ? 1 : 0.35
+      });
+      svg.appendChild(line);
+
+      if (isActive) {
+        allAxes.forEach((axis, i) => {
+          const cx = axisX(i), cy = y(p[axis.key], axis);
+          svg.appendChild(el("circle", { cx, cy, r: 3.5, fill: "var(--series-1)", stroke: "var(--surface-1)", "stroke-width": 1.5 }));
+          const vt = el("text", { class: "value-label", x: cx, y: cy - 9, "text-anchor": "middle" });
+          vt.textContent = p[axis.key];
+          svg.appendChild(vt);
+        });
+      }
+
+      const hit = el("polyline", { points: pts, class: "hit", fill: "none", stroke: "transparent", "stroke-width": 12 });
+      hit.addEventListener("mouseenter", e => { renderParallel("person:" + p.name); showTip(e, `<strong>${p.name}</strong><br>${p.identity}`); });
+      hit.addEventListener("mousemove", moveTip);
+      hit.addEventListener("mouseleave", () => { renderParallel(); hideTip(); });
+      hit.addEventListener("click", () => { highlightSel.value = "person:" + p.name; });
+      svg.appendChild(hit);
+    });
+
+    mount.appendChild(svg);
+  }
+  highlightSel.addEventListener("change", () => renderParallel());
+  renderParallel();
+
+  // ---------- data table (accessible twin) ----------
+  const tableMount = document.getElementById("table-mount");
+  const table = document.createElement("table");
+  table.className = "data-table";
+  const thead = document.createElement("thead");
+  thead.innerHTML = "<tr><th>Person</th><th>Identity</th>" + allAxes.map(a => `<th>${a.key}</th>`).join("") + "</tr>";
+  const tbody = document.createElement("tbody");
+  people.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${p.name}</td><td>${p.identity}</td>` + allAxes.map(a => `<td>${p[a.key]}</td>`).join("");
+    tbody.appendChild(tr);
+  });
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  tableMount.appendChild(table);
+})();
+</script>
+</body>
+</html>

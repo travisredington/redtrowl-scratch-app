@@ -25,17 +25,17 @@ function MainNav() {
                         Components
                     </NavLink>
                 </li>
-                {/*<li>
+                <li>
                     <NavLink
-                        to="/you"
+                        to="/big3"
                         className={({ isActive }) =>
                             `${isActive ? 'active' : ''}`
                         }
                     >
-                        You
+                        The Big 3
                     </NavLink>
                 </li>
-                <li>
+                {/*<li>
                     <NavLink
                         to="/ants"
                         className={({ isActive }) =>
